@@ -26,21 +26,27 @@ Config is of the form:
 where version is the newest version status
 """
 def expandPlaces(config, center, radius_km):
-    statusCache = db.child(venuesTable).child("status").get()
+    statusTable = db.child(venuesTable).child("status").get()
 
     # Fetch placeIDs to expand 
     location_table = db.child(locationsTable).get().val()
     placeIDs = geo.get_place_ids_in_radius(center, radius_km, location_table)
 
     for placeID in placeIDs:
-        placeStatus = statusCache.val()[placeID]
+        print(placeID)
+        placeStatus = statusTable.val()[placeID]
         # Get a list of (src, version) pairs that could be updated 
         newSources = [src for src in config if src not in placeStatus or config[src] > placeStatus[src]]
         if not newSources:
             continue
-        request_handler.researchPlace(placeID, newSources, placeStatus["identifiers"])
+        updatedSources = request_handler.researchPlace(placeID, newSources, placeStatus["identifiers"])
+        print(updatedSources)
+        # Write updated sources to /status
+        placeStatus = db.child(venuesTable).child("status").child(placeID)
+        for source in newSources:
+            print(placeID)
+            placeStatus.update({source: config[source] if source in updatedSources else 0})
         print("done: %s" % placeID)
-        exit(0)
 
 testConfig = { "yelp": 1,
                "tripadvisor": 1 }

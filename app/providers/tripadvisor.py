@@ -15,9 +15,9 @@ TRIP_ADVISOR_API = "https://api.tripadvisor.com/api/partner/2.0/location/{}"
 params = { "key": tripadvisorkey }
 
 def resolve(idObj):
-    url = idObj["url"]
-    taId = getNumId(url)
-    apiUrl = TRIP_ADVISOR_API.format(taId)
+#    url = idObj["url"]
+#    taId = getNumId(url)
+    apiUrl = TRIP_ADVISOR_API.format(idObj)
     return requests.get(apiUrl, params).json()
 
 
