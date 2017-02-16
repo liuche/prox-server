@@ -7,12 +7,13 @@ import sched
 import time
 import unicodedata
 
-from app.clients import factualClient, tripadvisorkey, yelpClient
+from app.clients import factualClient, tripadvisorkey, yelpClient, yelp3Client
 from app.constants import statusTable
 from config import FIREBASE_CONFIG
 import pyrebase
 from yelp import errors
 from factual import api
+from urllib2 import HTTPError
 
 logging.basicConfig(level=logging.WARNING)
 log = logging.getLogger('prox')
@@ -56,6 +57,13 @@ def recordAPIStatus(apiName):
                 yelpClient.get_business("kittea-cat-cafe-san-francisco-4")
             except errors.ExceededReqs:
                 req = False
+        elif (apiName == "yelp3"):
+            try:
+                yelp3Client.request("/businesses/{0}".format("kittea-cat-cafe-san-francisco-4"))
+            except HTTPError as e:
+                if e.code == 429:
+                    req = False
+
         else:
             raise ValueError("Unknown API name; see app/util.py for API values")
     except Exception as e:
